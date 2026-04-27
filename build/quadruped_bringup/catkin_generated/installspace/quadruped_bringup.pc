@@ -1,8 +1,0 @@
-prefix=/home/huypi/quadruped_ws/install
-
-Name: quadruped_bringup
-Description: Description of quadruped_bringup
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
