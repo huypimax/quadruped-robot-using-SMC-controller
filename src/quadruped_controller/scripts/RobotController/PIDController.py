@@ -59,6 +59,6 @@ class PID_controller(object):
         self.D_term = np.array([0.0,0.0])
         self.last_error = np.array([0.0,0.0])
 
-    def desired_RP_angles(des_roll, des_pitch):
+    def desired_RP_angles(self, des_roll, des_pitch):
         # set desired roll and pitch angles
         self.desired_roll_pitch = np.array([des_roll, des_pitch])
