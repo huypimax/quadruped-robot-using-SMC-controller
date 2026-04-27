@@ -1,0 +1,2 @@
+quadruped_bringup:quadruped_controller:quadruped_description
+-DCATKIN_DEVEL_PREFIX=/home/huypi/quadruped_ws/devel -DCMAKE_INSTALL_PREFIX=/home/huypi/quadruped_ws/install -G Unix Makefiles

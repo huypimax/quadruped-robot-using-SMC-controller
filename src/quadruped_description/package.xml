@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>quadruped_description</name>
+  <version>0.0.0</version>
+  <description>The quadruped_description package</description>
+  <maintainer email="huypi@todo.todo">huypi</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <export>
+
+  </export>
+</package>
