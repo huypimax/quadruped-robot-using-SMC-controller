@@ -50,7 +50,7 @@ quadruped_gazebo:
   RR_calf_joint:
       type: effort_controllers/JointPositionController
       joint: RR_calf_joint
-      pid: {p: 105, i: 0.5,d: 4.5, i_clamp_min:  -1000, i_clamp_max: 1000}
+      pid: {p: 105, i: 0.5, d: 4.5, i_clamp_min:  -1000, i_clamp_max: 1000}
 
   # RL Controllers ------------------------------------------------------------     
   RL_hip_joint:

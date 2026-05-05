@@ -33,7 +33,13 @@ class PS4_controller(object):
     def run(self):
         while not rospy.is_shutdown():
             self.publish_joy()
-            self.rate.sleep()
+            try:
+                self.rate.sleep()
+            except rospy.exceptions.ROSTimeMovedBackwardsException:
+                # Gazebo can reset /clock when the simulation is reset/restarted.
+                # Don't crash; just resync timing.
+                rospy.logwarn("ROS time moved backwards; resetting joystick ramp timing")
+                self.last_send_time = rospy.Time.now()
 
     def callback(self, msg):
         if self.use_button:
@@ -73,6 +79,10 @@ class PS4_controller(object):
 
     def publish_joy(self):
         t_now = rospy.Time.now()
+
+        # If simulation time jumped backwards, reset ramp reference.
+        if t_now < self.last_send_time:
+            self.last_send_time = t_now
 
         # determine changes in state
         buttons_change = array_equal(self.last_joy.buttons, self.target_joy.buttons)
