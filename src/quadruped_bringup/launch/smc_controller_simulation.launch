@@ -3,10 +3,23 @@
   <arg name="smc_rate" default="250" />
   <arg name="smc_use_imu" default="true" />
   <arg name="smc_startup_hold_s" default="1.0" />
-  <arg name="smc_torque_ramp_s" default="1.0" />
-  <arg name="smc_use_gait_after_startup" default="false" />
-  <arg name="smc_damping" default="0.8" />
+  <arg name="smc_torque_ramp_s" default="0.05" />
+
+  <!-- Match PID launch behavior: gait+IK active after startup so keyboard commands work -->
+  <arg name="smc_use_gait_after_startup" default="true" />
+
+  <!-- Numerical derivative smoothing (needed when qd comes from gait+IK) -->
   <arg name="smc_dqd_lpf_alpha" default="0.2" />
+
+  <!-- Optional extras (not in MATLAB block) -->
+  <arg name="smc_use_hold_pd" default="false" />
+  <arg name="smc_extra_damping" default="0.0" />
+
+  <!-- Auto-stand at startup (publish stand event once) -->
+  <arg name="auto_stand" default="false" />
+  <!-- Prefer in-node startup mode selection over rostopic one-shot -->
+  <arg name="smc_startup_mode" default="stand" />
+  <arg name="smc_debug" default="false" />
 
     <!-- Empty world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -18,15 +31,18 @@
     <arg name="robot" default="$(find quadruped_description)/urdf/quadruped.urdf"/>
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg robot)"/>
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
-          args="-param robot_description -urdf -x 0 -y 0 -z 0.4 -R 0 -P 0 -Y 0 -model quadruped_gazebo"/>
+          args="-param robot_description -urdf -x 0 -y 0 -z 0.6 -R 0 -P 0 -Y 0 -model quadruped_gazebo"/>
 
     <!-- Controllers (Effort controllers; SMC computes torques) -->
     <rosparam file="$(find quadruped_controller)/config/smc_controllers.yaml" command="load"/>
     <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" ns="quadruped_gazebo"
-          args="FR_hip_joint FR_thigh_joint FR_calf_joint
-                FL_hip_joint FL_thigh_joint FL_calf_joint
-                RR_hip_joint RR_thigh_joint RR_calf_joint
-                RL_hip_joint RL_thigh_joint RL_calf_joint"/>
+      args="joint_states_controller
+            FR_hip_joint FR_thigh_joint FR_calf_joint
+            FL_hip_joint FL_thigh_joint FL_calf_joint
+            RR_hip_joint RR_thigh_joint RR_calf_joint
+            RL_hip_joint RL_thigh_joint RL_calf_joint"
+      respawn="false"
+      launch-prefix="bash -c 'sleep 3; $0 $@'"/>
 
     <!-- Robot state publisher -->
     <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher" respawn="false" output="screen">
@@ -41,12 +57,22 @@
   <param name="startup_hold_s" value="$(arg smc_startup_hold_s)"/>
   <param name="torque_ramp_s" value="$(arg smc_torque_ramp_s)"/>
   <param name="use_gait_after_startup" value="$(arg smc_use_gait_after_startup)"/>
-  <param name="damping" value="$(arg smc_damping)"/>
   <param name="dqd_lpf_alpha" value="$(arg smc_dqd_lpf_alpha)"/>
+
+  <param name="startup_mode" value="$(arg smc_startup_mode)"/>
+  <param name="debug" value="$(arg smc_debug)"/>
+
+  <param name="use_hold_pd" value="$(arg smc_use_hold_pd)"/>
+  <param name="extra_damping" value="$(arg smc_extra_damping)"/>
     </node>
 
     <!-- Keyboard joystick -->
     <node pkg="quadruped_joystick" type="keyboard_to_joy.py" name="keyboard_to_joy" output="screen"/>
     <node pkg="quadruped_joystick" type="ramped_joystick.py" name="ramped_joystick" output="screen"/>
+
+    <!-- Kick the robot into STAND on startup so it "stands by itself" like the PID demo.
+      RobotController maps button index 3 to STAND. -->
+    <node if="$(arg auto_stand)" pkg="rostopic" type="rostopic" name="smc_auto_stand" output="screen"
+          args="pub -1 /quadruped_joy/joy_ramped sensor_msgs/Joy '{buttons: [0,0,0,1,0,0,0,0], axes: [0,0,0,0,0,0,0,0]}'" />
 
 </launch>

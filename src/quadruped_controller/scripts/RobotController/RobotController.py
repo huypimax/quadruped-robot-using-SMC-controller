@@ -3,6 +3,7 @@
 
 import numpy as np
 import tf
+import rospy
 
 from . StateCommand import State, Command, BehaviorState
 from . RestController import RestController
@@ -69,6 +70,7 @@ class Robot(object):
             self.command.rest_event = False
 
     def joystick_command(self,msg):
+        rospy.logwarn(f"JOY: {msg.buttons}")
         if msg.buttons[0]: # rest
             self.command.trot_event = False
             self.command.crawl_event = False

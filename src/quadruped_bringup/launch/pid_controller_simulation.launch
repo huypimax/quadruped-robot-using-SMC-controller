@@ -13,7 +13,7 @@
           args="-param robot_description -urdf -x 0 -y 0 -z 0.9 -R 0 -P 0 -Y 0 -model quadruped_gazebo"/>
 
     <!-- Controllers -->
-    <rosparam file="$(find quadruped_description)/config/pid_controllers.yaml" command="load"/>
+    <rosparam file="$(find quadruped_controller)/config/pid_controllers.yaml" command="load"/>
     <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" ns="quadruped_gazebo"
           args="FR_hip_joint FR_thigh_joint FR_calf_joint
                 FL_hip_joint FL_thigh_joint FL_calf_joint
